@@ -20,33 +20,50 @@ def main():
     seasons = pd.concat(season_index, axis = 0, ignore_index = True, join = 'inner')
     seasons.sort_values('Player', axis=0, inplace=True, ascending=True, ignore_index=True)
     playerNames = set(seasons['Player'].copy())
-    groupedSeasons = seasons.groupby('Player')
     playerNames = list(playerNames)
+  
     normalizedPPG = []
+    normalizedRPG = []
     playerNames.sort()
+
+    groupedSeasons = seasons.groupby('Player')
+
     for player in playerNames:
         sortedDf = groupedSeasons.get_group(player)
         
         pointsPerGame = list(sortedDf['Points Per Game'].copy())
+        reboundsPerGame = list(sortedDf['Total Rebounds Per Game'].copy())
         floatPointsPerGame = []
+        floatReboundsPerGame = []
 
         for year in pointsPerGame:
             floatPointsPerGame.append(float(year))
-        maxPpg = max(floatPointsPerGame)
+        
+        for year in reboundsPerGame:
+            floatReboundsPerGame.append(float(year))
+        
+        pointsPerGame = floatPointsPerGame
+        reboundsPerGame = floatReboundsPerGame
+        
+        maxPpg = max(pointsPerGame)
+        maxRpg = max(reboundsPerGame)
+
         if maxPpg == 0:
-            for _ in floatPointsPerGame:
+            for _ in pointsPerGame:
                 normalizedPPG.append(0)
         else:
-            for year in floatPointsPerGame:
+            for year in pointsPerGame:
                 normalizedPPG.append((year/maxPpg) * 100)
-    seasons['RankedPPG'] = normalizedPPG
-    statistics = list(seasons.columns)
-    statistics.remove('Rank')
-    statistics.remove('Player')
-    statistics.remove('Position')
-    statistics.remove('Team')
-    for stat in statistics:
-        pd.to_numeric(seasons[stat], downcast="float")
+        
+        if maxRpg == 0:
+            for _ in reboundsPerGame:
+                normalizedRPG.append(0)
+        else:
+            for year in reboundsPerGame:
+                normalizedRPG.append((year/maxRpg) * 100)
+    
+    seasons['Potential_PPG_PCT'] = normalizedPPG
+    seasons['Potential_RPG_PCT'] = normalizedRPG
     groupedSeasons = seasons.groupby('Player')
     print(groupedSeasons.get_group('Paul George'))
 
