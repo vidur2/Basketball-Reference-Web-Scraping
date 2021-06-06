@@ -9,14 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-# In[4]:
-
-hyperlink = input('URL(From a Sports Reference Site): ')
-player_name = input('Player Name: ')
-
-
-# In[5]:
-
 def BasketballReferencePull(link, year):
     #Gets and opens URL
     url = link
@@ -57,10 +49,7 @@ def BasketballReferencePull(link, year):
             .reset_index())
     #Sets the headers taken from the website as the headers for the pandas DataFrame
     df.columns = header_list
-    #Drops unwanted columns
-    df2 = df.drop(["Position", 'Team', 'Games', 'Games Started', 'Minutes Played Per Game', 'Field Goals Per Game', 'Field Goal Attempts Per Game', 'Field Goal Percentage', 'Rank', '3-Point Field Goals Per Game', '3-Point Field Goal Attempts Per Game', '2-Point Field Goals Per Game', '2-Point Field Goal Attempts Per Game', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', '3-Point Field Goal Percentage', 'Free Throw Attempts Per Game', 'Free Throws Per Game', 'Free Throw Percentage', 'Offensive Rebounds Per Game', 'Defensive Rebounds Per Game', 'Total Rebounds Per Game', 'Assists Per Game', 'Steals Per Game', 'Blocks Per Game', 'Turnovers Per Game', 'Personal Fouls Per Game'], axis = 1)
-    df2.set_index('Player')
-    return(df2)
+    return df
 
 
 # In[6]:
@@ -106,49 +95,6 @@ def BasketballReferencePlayer(link, player):
     #Sets the headers taken from the website as the headers for the pandas DataFrame
     df.columns = header_list
     return(df)
-
-
-# In[7]:
-
-BasketballReferencePlayer(hyperlink, player_name)
-
-
-# In[8]:
-
-Season_2017 = BasketballReferencePull('https://www.basketball-reference.com/leagues/NBA_2017_per_game.html', '2017')
-Season_2017.set_index('Player')
-Season_2017
-
-
-# In[10]:
-
-season_index = []
-#Attempts to create a table based on ppg over seasons since 1990
-for i in range(30):
-    year = 1990 + i
-    true_year = str(year)
-    season = BasketballReferencePull('https://www.basketball-reference.com/leagues/NBA_' + true_year + '_per_game.html', true_year)
-    season.rename(columns = {"Player" : "Player" + true_year})
-    season_index.append(season)
-
-
-# In[11]:
-
-seasons = pd.concat(season_index, axis = 1, ignore_index = False, join = 'inner')
-seasons
-
-
-# In[66]:
-
-age = (seasons["Player's age on February 1 of the season"] == 23)
-
-
-# In[68]:
-
-age
-
-
-# In[ ]:
 
 
 
