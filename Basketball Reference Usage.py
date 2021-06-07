@@ -31,6 +31,7 @@ def main():
     normalizedPPG = []
     normalizedRPG = []
     normalizedAPG = []
+    normalizedBPG = []
 
     # Groups player names together
     groupedSeasons = seasons.groupby('Player')
@@ -43,11 +44,13 @@ def main():
         pointsPerGame = list(sortedDf['Points Per Game'].copy())
         reboundsPerGame = list(sortedDf['Total Rebounds Per Game'].copy())
         assistsPerGame = list(sortedDf['Assists Per Game'].copy())
+        blocksPerGame = list(sortedDf['Blocks Per Game'].copy())
 
         # Casts the stats from str --> float64
         floatPointsPerGame = []
         floatReboundsPerGame = []
         floatAssistsPerGame = []
+        floatBlocksPerGame = []
 
         for year in pointsPerGame:
             floatPointsPerGame.append(float(year))
@@ -57,15 +60,20 @@ def main():
         
         for year in assistsPerGame:
             floatAssistsPerGame.append(float(year))
+        
+        for year in blocksPerGame:
+            floatBlocksPerGame.append(float(year))
 
         pointsPerGame = floatPointsPerGame
         reboundsPerGame = floatReboundsPerGame
         assistsPerGame = floatAssistsPerGame
+        blocksPerGame = floatBlocksPerGame
         
         # Finds the maximum of each stat and computes the new stats using that
         maxPpg = max(pointsPerGame)
         maxRpg = max(reboundsPerGame)
         maxApg = max(assistsPerGame)
+        maxBpg = max(blocksPerGame)
 
         if maxPpg == 0:
             for _ in pointsPerGame:
@@ -87,12 +95,20 @@ def main():
         else:
             for year in assistsPerGame:
                 normalizedAPG.append((year/maxApg) * 100)
+        
+        if maxBpg == 0:
+            for _ in blocksPerGame:
+                normalizedBPG.append(0)
+        else:
+            for year in blocksPerGame:
+                normalizedBPG.append((year/maxBpg) * 100)
     
     # Appends to data frame
     seasons['Potential_PPG_PCT'] = normalizedPPG
     seasons['Potential_RPG_PCT'] = normalizedRPG
     seasons['Potential_APG_PCT'] = normalizedAPG
-
+    seasons['Potential_BPG_PCT'] = normalizedBPG
+    
     # Prints out data frame for specific player to check
     groupedSeasons = seasons.groupby('Player')
     print(groupedSeasons.get_group('Paul George'))
