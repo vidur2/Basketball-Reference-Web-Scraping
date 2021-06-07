@@ -27,24 +27,6 @@ def main():
     playerNames = list(playerNames)
     playerNames.sort()
 
-    # # Imputation calculations
-    # # Points
-    # imputationDf = pd.DataFrame(seasons.copy())
-    # seasons_index = seasons.index
-    # imputationPointsPerGame = int(seasons["Points Per Game"]) == 0
-
-    # zeroPointsIndex = season_index[imputationPointsPerGame]
-    # zeroPointsIndex.to_list()
-
-    # imputationDf = imputationDf.drop(labels=zeroPointsIndex, axis=0)
-    # pointsMedian = float(imputationDf["Points Per Game"].median())
-
-    # # Rebounds
-    # imputationDf = pd.DataFrame(seasons.copy())
-    # imputationReboundsPerGame = int(seasons["Total Rebounds Per Game"]) == 0
-
-    # zeroReboundsIndex = int(seasons["Total Rebounds Per Game"])
-
     # Initializes Empty Lists to store new stats
     normalizedPPG = []
     normalizedRPG = []
