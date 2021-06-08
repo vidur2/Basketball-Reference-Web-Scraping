@@ -5,7 +5,8 @@ Use newfound pandas knowledge to yeet project into existence
 '''
 
 # Imports
-from basketballRefCommands import *
+from basketballRefCommands import BasketballReferencePull
+import pandas as pd
 
 
 def main():
@@ -21,7 +22,12 @@ def main():
     # Combines this data into 1 data drame
     seasons = pd.concat(season_index, axis = 0, ignore_index = True, join = 'inner')
     seasons.sort_values('Player', axis=0, inplace=True, ascending=True, ignore_index=True)
+    seasons.drop(labels='Rank', inplace=True, axis=1)
 
+    seasonsFloatable = seasons[seasons.columns.difference(['Player','Position','Team'])].apply(pd.to_numeric, errors='coerce', downcast='float')   # Casts dataframe from str --> float
+    
+    seasons[seasonsFloatable.columns] = seasonsFloatable
+    
     # Gets a Unique set of player names
     playerNames = set(seasons['Player'].copy())
     playerNames = list(playerNames)
@@ -56,34 +62,6 @@ def main():
         blocksPerGame = list(sortedDf['Blocks Per Game'].copy())
         stealsPerGame = list(sortedDf['Steals Per Game'].copy())
 
-        # Casts the stats from str --> float64
-        floatPointsPerGame = []
-        floatReboundsPerGame = []
-        floatAssistsPerGame = []
-        floatBlocksPerGame = []
-        floatStealsPerGame = []
-
-        for year in pointsPerGame:
-            floatPointsPerGame.append(float(year))
-        
-        for year in reboundsPerGame:
-            floatReboundsPerGame.append(float(year))
-        
-        for year in assistsPerGame:
-            floatAssistsPerGame.append(float(year))
-        
-        for year in blocksPerGame:
-            floatBlocksPerGame.append(float(year))
-        
-        for year in stealsPerGame:
-            floatStealsPerGame.append(float(year))
-
-        pointsPerGame = floatPointsPerGame
-        reboundsPerGame = floatReboundsPerGame
-        assistsPerGame = floatAssistsPerGame
-        blocksPerGame = floatBlocksPerGame
-        stealsPerGame = floatStealsPerGame
-        
         # Finds the maximum of each stat and computes the new stats using that
         maxPpg = max(pointsPerGame)
         maxRpg = max(reboundsPerGame)
