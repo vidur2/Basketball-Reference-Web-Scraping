@@ -7,7 +7,21 @@ Use newfound pandas knowledge to yeet project into existence
 # Imports
 from basketballRefCommands import BasketballReferencePull
 import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
+
+def PosToNumeric(position):
+    if position == 'PG':
+        return 1
+    elif position == 'SG':
+        return 2
+    elif position == 'SF':
+        return 3
+    elif position == 'PF':
+        return 4
+    else:
+        return 5
 
 def main():
     # For Loop Gathers all season data from 1990-2020
@@ -24,7 +38,7 @@ def main():
     seasons.sort_values('Player', axis=0, inplace=True, ascending=True, ignore_index=True)
     seasons.drop(labels='Rank', inplace=True, axis=1)
 
-    seasonsFloatable = seasons[seasons.columns.difference(['Player','Position','Team'])].apply(pd.to_numeric, errors='coerce', downcast='float')   # Casts dataframe from str --> float
+    seasonsFloatable = seasons[seasons.columns.difference(['Player','Position','Team'])].apply(pd.to_numeric, errors='coerce', downcast='float', )   # Casts dataframe from str --> float
     
     seasons[seasonsFloatable.columns] = seasonsFloatable
     
@@ -120,16 +134,26 @@ def main():
             
     
     # Appends to data frame
-    seasons['Potential_PPG_PCT'] = normalizedPPG
-    seasons['Potential_RPG_PCT'] = normalizedRPG
-    seasons['Potential_APG_PCT'] = normalizedAPG
-    seasons['Potential_BPG_PCT'] = normalizedBPG
-    seasons['Potential_SPG_PCT'] = normalizedSPG
+    # seasons['Potential_PPG_PCT'] = normalizedPPG
+    # seasons['Potential_RPG_PCT'] = normalizedRPG
+    # seasons['Potential_APG_PCT'] = normalizedAPG
+    # seasons['Potential_BPG_PCT'] = normalizedBPG
+    # seasons['Potential_SPG_PCT'] = normalizedSPG
     seasons['Tot_Potential_PCT'] = averagedPotential
 
     # Prints out data frame for specific player to check
     groupedSeasons = seasons.groupby('Player')
     testDF = print(groupedSeasons.get_group('Paul George'))
+
+    # Changes str Categorical variables to numeric
+    seasons['Position'] = seasons['Position'].apply(PosToNumeric)
+
+    # Actual Model generation
+    independentVariable = seasons[list(seasons.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage']))]
+    dependentVariable = seasons['Tot_Potential_PCT']
+    linearRegression = LinearRegression()
+    linearRegression.fit(independentVariable, dependentVariable)
+    testDataLamelo = [1, 19, 51, 31, 28.8, 5.7, 13.2, 1.8, 5.1, 3.9, 8.1, ]
 
 if __name__ == '__main__':
     main()
