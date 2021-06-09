@@ -8,8 +8,10 @@ Use newfound pandas knowledge to yeet project into existence
 from basketballRefCommands import BasketballReferencePull
 import pandas as pd
 import numpy as np
+import random
 from sklearn.linear_model import LinearRegression
-
+from sklearn import metrics
+import matplotlib.pyplot as plt
 
 def PosToNumeric(position):
     if position == 'PG':
@@ -24,6 +26,7 @@ def PosToNumeric(position):
         return 5
 
 def main():
+    pd.options.mode.chained_assignment = None
     # For Loop Gathers all season data from 1990-2020
     season_index = []
     for i in range(30):
@@ -148,12 +151,26 @@ def main():
     # Changes str Categorical variables to numeric
     seasons['Position'] = seasons['Position'].apply(PosToNumeric)
 
-    # Actual Model generation
-    independentVariable = seasons[list(seasons.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage']))]
-    dependentVariable = seasons['Tot_Potential_PCT']
-    linearRegression = LinearRegression()
-    linearRegression.fit(independentVariable, dependentVariable)
-    testDataLamelo = [1, 19, 51, 31, 28.8, 5.7, 13.2, 1.8, 5.1, 3.9, 8.1, ]
+    # Split Data into test data frames and model generation
+    random.seed(42069)
+    randomRowLabel = []
+    for _ in range(len(pointsPerGame) - 1):
+        randomNumber = random.random()
+        randomRowLabel.append(randomNumber)
+    seasons['Random Number'] = randomNumber
+    seasons.sort_values('Random Number', ascending=True, ignore_index=True, inplace=True)
+    trainData = seasons[0:10_000].copy()
+    testData = pd.DataFrame(seasons[10_001:].copy())
 
+    # # Actual Model generations
+    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage']))]
+    dependentVariable = trainData['Tot_Potential_PCT']
+    linearRegr = LinearRegression()
+    linearRegr.fit(independentVariable, dependentVariable)
+    
+    testSet = testData[list(testData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage']))]
+    testPrediction = linearRegr.predict(testSet)
+    testData['PredictionVariable'] = testPrediction
+    print(linearRegr.score(testSet, testData['Tot_Potential_PCT']))
 if __name__ == '__main__':
     main()
