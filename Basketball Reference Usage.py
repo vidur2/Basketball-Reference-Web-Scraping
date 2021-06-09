@@ -12,6 +12,7 @@ import random
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
 
 def PosToNumeric(position):
     if position == 'PG':
@@ -162,15 +163,33 @@ def main():
     trainData = seasons[0:10_000].copy()
     testData = pd.DataFrame(seasons[10_001:].copy())
 
-    # # Actual Model generations
+    # Actual Model generations
+    
     independentVariable = trainData[list(trainData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage']))]
     dependentVariable = trainData['Tot_Potential_PCT']
+    
+    # Linear Model Generation
     linearRegr = LinearRegression()
     linearRegr.fit(independentVariable, dependentVariable)
-    
     testSet = testData[list(testData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage']))]
     testPrediction = linearRegr.predict(testSet)
-    testData['PredictionVariable'] = testPrediction
+    testData['PredictionVariable_Linear'] = testPrediction
     print(linearRegr.score(testSet, testData['Tot_Potential_PCT']))
+
+    # Polynomial Regression
+    #Generating Polynomial Matrix
+    predVariable = testData[list(testData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage']))]
+    polynomialRegr = PolynomialFeatures()
+    polynomialModels = polynomialRegr.fit_transform(independentVariable)
+    #Fitting the data
+    predict = polynomialRegr.fit_transform(predVariable)
+    linearRegr = LinearRegression()
+    linearRegr.fit(polynomialModels, dependentVariable)
+    testData['Predicted'] = linearRegr.predict(predict)
+    print(linearRegr.score(predict, testData['Tot_Potential_PCT']))
+
+    # Naive Bayes Algorithm
+    
+
 if __name__ == '__main__':
     main()
