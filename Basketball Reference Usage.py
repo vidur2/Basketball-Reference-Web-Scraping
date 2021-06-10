@@ -147,7 +147,7 @@ def main():
     seasons['Tot_Potential_PCT'] = averagedPotential
 
     # Binning the Data
-    seasons['Tot_Potential_PCT_RANK'] = pd.qcut(seasons['Tot_Potential_PCT'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=11, precision=0)
+    seasons['Tot_Potential_PCT_RANK'] = pd.qcut(seasons['Tot_Potential_PCT'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
     # Prints out data frame for specific player to check
     groupedSeasons = seasons.groupby('Player')
     testDF = print(groupedSeasons.get_group('Paul George'))
@@ -191,11 +191,11 @@ def main():
     
     # Naive Bayes Algorithm
     gnb = GaussianNB()
-    dependentVariable = seasons['Tot_Potential_PCT_RANK']
+    dependentVariable = trainData['Tot_Potential_PCT_RANK']
     gnbModel = gnb.fit(independentVariable, dependentVariable)
     gnbOutput = gnb.predict(testSet)
     testData['PredictionVariable_Naive Bayes'] = gnbOutput
-    print(testData[['PredictionVariable_Linear', 'PredictionVariable_Polynomial', 'PredictionVariable_Naive Bayes', 'Tot_Potential_PCT']])
+    print(testData[['PredictionVariable_Linear', 'PredictionVariable_Polynomial', 'Tot_Potential_PCT', 'Tot_Potential_PCT_RANK', 'PredictionVariable_Naive Bayes']])
 
 if __name__ == '__main__':
     main()
