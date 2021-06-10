@@ -13,6 +13,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.naive_bayes import GaussianNB
 
 def PosToNumeric(position):
     if position == 'PG':
@@ -145,6 +146,8 @@ def main():
     # seasons['Potential_SPG_PCT'] = normalizedSPG
     seasons['Tot_Potential_PCT'] = averagedPotential
 
+    # Binning the Data
+    seasons['Tot_Potential_PCT_RANK'] = pd.qcut(seasons['Tot_Potential_PCT'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=11, precision=0)
     # Prints out data frame for specific player to check
     groupedSeasons = seasons.groupby('Player')
     testDF = print(groupedSeasons.get_group('Paul George'))
@@ -178,18 +181,21 @@ def main():
 
     # Polynomial Regression
     #Generating Polynomial Matrix
-    predVariable = testData[list(testData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage']))]
+    dependentVariable = trainData['Tot_Potential_PCT']
     polynomialRegr = PolynomialFeatures()
     polynomialModels = polynomialRegr.fit_transform(independentVariable)
-    #Fitting the data
-    predict = polynomialRegr.fit_transform(predVariable)
+    predict = polynomialRegr.fit_transform(testSet)
     linearRegr = LinearRegression()
     linearRegr.fit(polynomialModels, dependentVariable)
-    testData['Predicted'] = linearRegr.predict(predict)
-    print(linearRegr.score(predict, testData['Tot_Potential_PCT']))
-
-    # Naive Bayes Algorithm
+    testData['PredictionVariable_Polynomial'] = linearRegr.predict(predict)
     
+    # Naive Bayes Algorithm
+    gnb = GaussianNB()
+    dependentVariable = seasons['Tot_Potential_PCT_RANK']
+    gnbModel = gnb.fit(independentVariable, dependentVariable)
+    gnbOutput = gnb.predict(testSet)
+    testData['PredictionVariable_Naive Bayes'] = gnbOutput
+    print(testData[['PredictionVariable_Linear', 'PredictionVariable_Polynomial', 'PredictionVariable_Naive Bayes', 'Tot_Potential_PCT']])
 
 if __name__ == '__main__':
     main()
