@@ -54,11 +54,6 @@ def main():
 
     # Initializes Empty Lists to store new stats
     normalizedPPG = []
-    normalizedRPG = []
-    normalizedAPG = []
-    normalizedBPG = []
-    normalizedSPG = []
-    averagedPotential = []
 
     # Groups player names together
     groupedSeasons = seasons.groupby('Player')
@@ -66,88 +61,28 @@ def main():
     # Iterates through each player group to generate stats
     for player in playerNames:
         sortedDf = groupedSeasons.get_group(player)     # Generates unique player data frame
-        
-        # Lists which are reset each iteration
-        averagingPPG = []
-        averagingRPG = []
-        averagingAPG = []
-        averagingBPG = []
-        averagingSPG = []
 
         # Gets the stats from the data frame
         pointsPerGame = list(sortedDf['Points Per Game'].copy())
-        reboundsPerGame = list(sortedDf['Total Rebounds Per Game'].copy())
-        assistsPerGame = list(sortedDf['Assists Per Game'].copy())
-        blocksPerGame = list(sortedDf['Blocks Per Game'].copy())
-        stealsPerGame = list(sortedDf['Steals Per Game'].copy())
 
         # Finds the maximum of each stat and computes the new stats using that
         maxPpg = max(pointsPerGame)
-        maxRpg = max(reboundsPerGame)
-        maxApg = max(assistsPerGame)
-        maxBpg = max(blocksPerGame)
-        maxSpg = max(stealsPerGame)
 
-        if maxPpg == 0:
-            for _ in pointsPerGame:
-                normalizedPPG.append(0)
-                averagingPPG.append(0)
-        else:
-            for year in pointsPerGame:
-                normalizedPPG.append((year/maxPpg) * 100)
-                averagingPPG.append((year/maxPpg) * 100)
-        
-        if maxRpg == 0:
-            for _ in reboundsPerGame:
-                normalizedRPG.append(0)
-                averagingRPG.append(0)
-        else:
-            for year in reboundsPerGame:
-                normalizedRPG.append((year/maxRpg) * 100)
-                averagingRPG.append((year/maxRpg) * 100)
-        
-        if maxApg == 0:
-            for _ in assistsPerGame:
-                normalizedAPG.append(0)
-                averagingAPG.append(0)
-        else:
-            for year in assistsPerGame:
-                normalizedAPG.append((year/maxApg) * 100)
-                averagingAPG.append((year/maxApg) * 100)
-        
-        if maxBpg == 0:
-            for _ in blocksPerGame:
-                normalizedBPG.append(0)
-                averagingBPG.append(0)
-        else:
-            for year in blocksPerGame:
-                normalizedBPG.append((year/maxBpg) * 100)
-                averagingBPG.append((year/maxBpg) * 100)
 
-        if maxSpg == 0:
-            for _ in stealsPerGame:
-                normalizedSPG.append(0)
-                averagingSPG.append(0)
-        else:
-            for year in stealsPerGame:
-                normalizedSPG.append((year/maxSpg) * 100)
-                averagingSPG.append((year/maxSpg) * 100)
-        
-        for i in range(len(averagingPPG)):
-            average = (averagingPPG[i - 1] + averagingRPG[i - 1] + averagingAPG[i - 1] + averagingBPG[i - 1] + averagingSPG[i - 1]) / 5
-            averagedPotential.append(average)
+        for year in pointsPerGame:
+            normalizedPPG.append(maxPpg)
             
     
-    # Appends to data frame
-    # seasons['Potential_PPG_PCT'] = normalizedPPG
-    # seasons['Potential_RPG_PCT'] = normalizedRPG
-    # seasons['Potential_APG_PCT'] = normalizedAPG
-    # seasons['Potential_BPG_PCT'] = normalizedBPG
-    # seasons['Potential_SPG_PCT'] = normalizedSPG
-    seasons['Tot_Potential_PCT'] = averagedPotential
+    seasons['Max PPG'] = normalizedPPG
 
     # Binning the Data
-    seasons['Tot_Potential_PCT_RANK'] = pd.qcut(seasons['Tot_Potential_PCT'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
+    seasons['Max_PPG_RANK'] = pd.qcut(seasons['Max PPG'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
+    seasonsDeciles = seasons.groupby('Max_PPG_RANK')
+    outliers = (1, 2, 9, 10)
+    for outlier in outliers:
+        decileGroup = seasonsDeciles.get_group(outlier)
+        decileIndex = list(decileGroup.index())
+        seasons.drop(decileIndex, inplace=True)
     # Prints out data frame for specific player to check
     groupedSeasons = seasons.groupby('Player')
     testDF = print(groupedSeasons.get_group('Paul George'))
@@ -168,20 +103,20 @@ def main():
 
     # Actual Model generations
     
-    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Tot_Potential_PCT_RANK']))]
-    dependentVariable = trainData['Tot_Potential_PCT']
+    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK']))]
+    dependentVariable = trainData['Max PPG']
     
     # Linear Model Generation
     linearRegr = LinearRegression()
     linearRegr.fit(independentVariable, dependentVariable)
-    testSet = testData[list(testData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Tot_Potential_PCT_RANK']))]
+    testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK']))]
     testPrediction = linearRegr.predict(testSet)
     testData['PredictionVariable_Linear'] = testPrediction
-    print(linearRegr.score(testSet, testData['Tot_Potential_PCT']))
+    print(linearRegr.score(testSet, testData['Max PPG']))
 
     # Polynomial Regression
     #Generating Polynomial Matrix
-    dependentVariable = trainData['Tot_Potential_PCT']
+    dependentVariable = trainData['Max PPG']
     polynomialRegr = PolynomialFeatures()
     polynomialModels = polynomialRegr.fit_transform(independentVariable)
     predict = polynomialRegr.fit_transform(testSet)
@@ -191,13 +126,11 @@ def main():
     
     # Naive Bayes Algorithm
     gnb = GaussianNB()
-    dependentVariable = trainData['Tot_Potential_PCT_RANK']
+    dependentVariable = trainData['Max_PPG_RANK']
     gnbModel = gnb.fit(independentVariable, dependentVariable)
     gnbOutput = gnb.predict(testSet)
     testData['PredictionVariable_Naive Bayes'] = gnbOutput
-    groupedTest = testData.groupby("Player's age on February 1 of the season")
-    result = groupedTest.get_group(19.0)
-    print(result[['PredictionVariable_Linear', 'PredictionVariable_Polynomial', 'Tot_Potential_PCT']])
+    print(testData[['PredictionVariable_Linear', 'PredictionVariable_Polynomial', 'Max PPG']])
 
 
 if __name__ == '__main__':
