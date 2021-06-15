@@ -83,7 +83,6 @@ def main():
     for decile in droppedDeciles:
         seasonsDeciles = seasons.groupby('Max_PPG_RANK')
         decileGroup = seasonsDeciles.get_group(decile)
-        print(list(decileGroup['Max_PPG_RANK']))
         decileIndex = list(decileGroup.index)
         seasons.drop(decileIndex, inplace=True)
 
@@ -111,24 +110,18 @@ def main():
     linearRegr = LinearRegression()
     linearRegr.fit(independentVariable, dependentVariable)
     testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK']))]
+    trainSet = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK']))]
     testPrediction = linearRegr.predict(testSet)
-    testData['PredictionVariable_Linear'] = testPrediction
+    trainPrediction = linearRegr.predict(trainSet)
     
+    testData['PredictionVariable_Linear'] = testPrediction
+    trainData['PredictionVariabl_Linear'] = trainPrediction
+
     print('Linear Regression r^2 value is: ')
     print(linearRegr.score(testSet, testData['Max PPG']))
 
-    # Polynomial Regression
-    #Generating Polynomial Matrix
-    dependentVariable = trainData['Max PPG']
-    polynomialRegr = PolynomialFeatures()
-    polynomialModels = polynomialRegr.fit_transform(independentVariable)
-    predict = polynomialRegr.fit_transform(testSet)
-    linearRegr1 = LinearRegression()
-    linearRegr1.fit(polynomialModels, dependentVariable)
-    testData['PredictionVariable_Polynomial'] = linearRegr.predict(predict)
-
-    print('Polynomial Regression r^2 value is:  ')
-    print(linearRegr1.score(testSet, testData['Max PPG']))
+    print('\nLinear Regression r^2 values(train data) is: ')
+    print(linearRegr.score(trainSet, trainData['Max PPG']))
 
 
 if __name__ == '__main__':
