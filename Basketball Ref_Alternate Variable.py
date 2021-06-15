@@ -122,6 +122,8 @@ def main():
 
     print('\nLinear Regression r^2 values(train data) is: ')
     print(linearRegr.score(trainSet, trainData['Max PPG']))
+    wantedValues = testData[['PredictionVariable_Linear', 'Max PPG', 'Player', "Player's age on February 1 of the season"]].copy().groupby('Player')
+    print(wantedValues.get_group('Jason Kidd*'))
 
 
 if __name__ == '__main__':
