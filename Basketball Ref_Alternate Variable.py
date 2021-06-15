@@ -79,9 +79,12 @@ def main():
     seasons['Max_PPG_RANK'] = pd.qcut(seasons['Max PPG'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
     seasonsDeciles = seasons.groupby('Max_PPG_RANK')
     outliers = (1, 2, 9, 10)
+    seasons.sort_values('Max_PPG_RANK', ascending=True, inplace=True, ignore_index=True)
     for outlier in outliers:
         decileGroup = seasonsDeciles.get_group(outlier)
-        decileIndex = list(decileGroup.index())
+        decileIndex = list(decileGroup.index)
+        print(len(decileIndex))
+        print(len(list(seasons.index)))
         seasons.drop(decileIndex, inplace=True)
     # Prints out data frame for specific player to check
     groupedSeasons = seasons.groupby('Player')
