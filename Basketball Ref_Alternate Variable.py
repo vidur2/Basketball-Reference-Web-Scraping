@@ -10,10 +10,7 @@ import pandas as pd
 import numpy as np
 import random
 from sklearn.linear_model import LinearRegression
-from sklearn import metrics
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.naive_bayes import GaussianNB
 
 def PosToNumeric(position):
     if position == 'PG':
@@ -79,19 +76,19 @@ def main():
     seasons['Max_PPG_RANK'] = pd.qcut(seasons['Max PPG'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
 
     # Drop unwanted Quartiles to normalize the data
-    droppedDeciles = (1, 2, 10)
-    for decile in droppedDeciles:
-        seasonsDeciles = seasons.groupby('Max_PPG_RANK')
-        decileGroup = seasonsDeciles.get_group(decile)
-        decileIndex = list(decileGroup.index)
-        seasons.drop(decileIndex, inplace=True)
+    # droppedDeciles = (1, 2, 10)
+    # for decile in droppedDeciles:
+    #     seasonsDeciles = seasons.groupby('Max_PPG_RANK')
+    #     decileGroup = seasonsDeciles.get_group(decile)
+    #     decileIndex = list(decileGroup.index)
+    #     seasons.drop(decileIndex, inplace=True)
 
 
     # Changes str Categorical variables to numeric
     seasons['Position'] = seasons['Position'].apply(PosToNumeric)
 
     # Split Data into test data frames and model generation
-    random.seed(42069)
+    random.seed(123456)
     randomRowLabel = []
     for _ in range(len(pointsPerGame) - 1):
         randomNumber = random.random()
@@ -103,14 +100,14 @@ def main():
 
     # Actual Model generations
     
-    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK']))]
+    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game']))]
     dependentVariable = trainData['Max PPG']
     
     # Linear Model Generation
     linearRegr = LinearRegression()
     linearRegr.fit(independentVariable, dependentVariable)
-    testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK']))]
-    trainSet = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK']))]
+    testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game']))]
+    trainSet = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game']))]
     testPrediction = linearRegr.predict(testSet)
     trainPrediction = linearRegr.predict(trainSet)
     
@@ -122,8 +119,8 @@ def main():
 
     print('\nLinear Regression r^2 values(train data) is: ')
     print(linearRegr.score(trainSet, trainData['Max PPG']))
-    wantedValues = testData[['PredictionVariable_Linear', 'Max PPG', 'Player', "Player's age on February 1 of the season"]].copy().groupby('Player')
-    print(wantedValues.get_group('Jason Kidd*'))
+    wantedValues = testData[['PredictionVariable_Linear', 'Max PPG', 'Player', 'Points Per Game']].copy().groupby('Player')
+    print(wantedValues.get_group('Joel Embiid'))
 
 
 if __name__ == '__main__':
