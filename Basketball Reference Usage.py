@@ -148,6 +148,19 @@ def main():
 
     # Binning the Data
     seasons['Tot_Potential_PCT_RANK'] = pd.qcut(seasons['Tot_Potential_PCT'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
+    seasonsDeciles = seasons.groupby('Tot_Potential_PCT_RANK')
+    seasons.sort_values('Tot_Potential_PCT_RANK', ascending=True, inplace=True, ignore_index=True)
+    
+    # Drop unwanted Quartiles to normalize the data
+    decileGroup = seasonsDeciles.get_group(1)
+    decileIndex = list(decileGroup.index)
+    seasons.drop(decileIndex, inplace=True)
+    decileGroup = seasonsDeciles.get_group(2)
+    decileIndex = list(decileGroup.index)
+    seasons.drop(decileIndex, inplace=True)
+    decileGroup = seasonsDeciles.get_group(9)
+    decileIndex = seasons.get_group(10)
+    seasons.drop(decileIndex, inplace=True)
     # Prints out data frame for specific player to check
     groupedSeasons = seasons.groupby('Player')
     testDF = print(groupedSeasons.get_group('Paul George'))

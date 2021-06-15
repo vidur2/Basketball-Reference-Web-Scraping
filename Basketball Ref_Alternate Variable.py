@@ -77,18 +77,16 @@ def main():
 
     # Binning the Data
     seasons['Max_PPG_RANK'] = pd.qcut(seasons['Max PPG'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
-    seasonsDeciles = seasons.groupby('Max_PPG_RANK')
-    outliers = (1, 2, 9, 10)
-    seasons.sort_values('Max_PPG_RANK', ascending=True, inplace=True, ignore_index=True)
-    for outlier in outliers:
-        decileGroup = seasonsDeciles.get_group(outlier)
+
+    # Drop unwanted Quartiles to normalize the data
+    droppedDeciles = (1, 2, 10)
+    for decile in droppedDeciles:
+        seasonsDeciles = seasons.groupby('Max_PPG_RANK')
+        decileGroup = seasonsDeciles.get_group(decile)
+        print(list(decileGroup['Max_PPG_RANK']))
         decileIndex = list(decileGroup.index)
-        print(len(decileIndex))
-        print(len(list(seasons.index)))
         seasons.drop(decileIndex, inplace=True)
-    # Prints out data frame for specific player to check
-    groupedSeasons = seasons.groupby('Player')
-    testDF = print(groupedSeasons.get_group('Paul George'))
+
 
     # Changes str Categorical variables to numeric
     seasons['Position'] = seasons['Position'].apply(PosToNumeric)
@@ -115,6 +113,8 @@ def main():
     testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK']))]
     testPrediction = linearRegr.predict(testSet)
     testData['PredictionVariable_Linear'] = testPrediction
+    
+    print('Linear Regression r^2 value is: ')
     print(linearRegr.score(testSet, testData['Max PPG']))
 
     # Polynomial Regression
@@ -123,17 +123,12 @@ def main():
     polynomialRegr = PolynomialFeatures()
     polynomialModels = polynomialRegr.fit_transform(independentVariable)
     predict = polynomialRegr.fit_transform(testSet)
-    linearRegr = LinearRegression()
-    linearRegr.fit(polynomialModels, dependentVariable)
+    linearRegr1 = LinearRegression()
+    linearRegr1.fit(polynomialModels, dependentVariable)
     testData['PredictionVariable_Polynomial'] = linearRegr.predict(predict)
-    
-    # Naive Bayes Algorithm
-    gnb = GaussianNB()
-    dependentVariable = trainData['Max_PPG_RANK']
-    gnbModel = gnb.fit(independentVariable, dependentVariable)
-    gnbOutput = gnb.predict(testSet)
-    testData['PredictionVariable_Naive Bayes'] = gnbOutput
-    print(testData[['PredictionVariable_Linear', 'PredictionVariable_Polynomial', 'Max PPG']])
+
+    print('Polynomial Regression r^2 value is:  ')
+    print(linearRegr1.score(testSet, testData['Max PPG']))
 
 
 if __name__ == '__main__':
