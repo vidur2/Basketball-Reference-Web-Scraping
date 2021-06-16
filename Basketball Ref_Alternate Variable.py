@@ -76,15 +76,6 @@ def main():
     # Binning the Data
     seasons['Max_PPG_RANK'] = pd.qcut(seasons['Max PPG'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
 
-    # Drop unwanted Quartiles to normalize the data
-    # droppedDeciles = (1, 2, 10)
-    # for decile in droppedDeciles:
-    #     seasonsDeciles = seasons.groupby('Max_PPG_RANK')
-    #     decileGroup = seasonsDeciles.get_group(decile)
-    #     decileIndex = list(decileGroup.index)
-    #     seasons.drop(decileIndex, inplace=True)
-
-
     # Changes str Categorical variables to numeric
     seasons['Position'] = seasons['Position'].apply(PosToNumeric)
 
@@ -107,8 +98,8 @@ def main():
     # Linear Model Generation
     linearRegr = LinearRegression()
     linearRegr.fit(independentVariable, dependentVariable)
-    testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game']))]
-    trainSet = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game']))]
+    testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game', 'Random Number']))]
+    trainSet = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game', 'Random Number']))]
     testPrediction = linearRegr.predict(testSet)
     trainPrediction = linearRegr.predict(trainSet)
     
@@ -128,8 +119,11 @@ def main():
     polyreg = make_pipeline(PolynomialFeatures(degree), LinearRegression())
     polyreg.fit(independentVariable, dependentVariable)
     print('\nPolynomial Regression r^2 value(test data) is: \n')
-    polyreg.predict(testSet)
+    polynomialPrediction = list(polyreg.predict(testSet))
+    testData['Polynomial Prediction'] = polynomialPrediction
     print(polyreg.score(testSet, testData['Max PPG']))
-
+    print(testData[['Max PPG', 'Polynomial Prediction', 'PredictionVariable_Linear']])
+    print(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game']))
+    lameloBall = [8.1, 3.9, 5.1, 1.8, 0.4, 4.7, 13.2, 5.7, 3.2, 2.5, 51, 31, 28.8, 1.2, ]
 if __name__ == '__main__':
     main()
