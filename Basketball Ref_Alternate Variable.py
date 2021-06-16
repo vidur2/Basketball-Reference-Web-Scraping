@@ -11,6 +11,8 @@ import numpy as np
 import random
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 
 def PosToNumeric(position):
     if position == 'PG':
@@ -62,7 +64,6 @@ def main():
         # Gets the stats from the data frame
         pointsPerGame = list(sortedDf['Points Per Game'].copy())
 
-        # Finds the maximum of each stat and computes the new stats using that
         maxPpg = max(pointsPerGame)
 
 
@@ -114,7 +115,7 @@ def main():
     testData['PredictionVariable_Linear'] = testPrediction
     trainData['PredictionVariabl_Linear'] = trainPrediction
 
-    print('Linear Regression r^2 value is: ')
+    print('Linear Regression r^2 value(test data) is: ')
     print(linearRegr.score(testSet, testData['Max PPG']))
 
     print('\nLinear Regression r^2 values(train data) is: ')
@@ -122,6 +123,13 @@ def main():
     wantedValues = testData[['PredictionVariable_Linear', 'Max PPG', 'Player', 'Points Per Game']].copy().groupby('Player')
     print(wantedValues.get_group('Joel Embiid'))
 
+    # Polynomial Regression
+    degree = 2
+    polyreg = make_pipeline(PolynomialFeatures(degree), LinearRegression())
+    polyreg.fit(independentVariable, dependentVariable)
+    print('\nPolynomial Regression r^2 value(test data) is: \n')
+    polyreg.predict(testSet)
+    print(polyreg.score(testSet, testData['Max PPG']))
 
 if __name__ == '__main__':
     main()
