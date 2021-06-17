@@ -13,6 +13,7 @@ from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
+from sklearn.naive_bayes import GaussianNB
 
 def PosToNumeric(position):
     if position == 'PG':
@@ -142,17 +143,26 @@ def main():
     polynomialImputationQuad = list(polyreg.predict(trainSet))
     polynomialPredictionCubic = list(polycube.predict(testSet))
     polynomialImputationCubic = list(polycube.predict(trainSet))
+    
+    # Put into dataframe
     testData['Polynomial Prediction(Quad)'] = polynomialPredictionQuad
     trainData['Polynomial Prediction(Quad)'] = polynomialImputationQuad
     testData['Polynomial Prediction(cubic)'] = polynomialPredictionCubic
     trainData['Polynomial Prediction(cubic)'] = polynomialImputationCubic
 
+    # Naive Bayes Classifier
+    gnbClassifier = GaussianNB()
+    gnbClassifier.fit(independentVariable, trainData['Max_PPG_RANK'])
+    gnbPredictedRow = list(gnbClassifier.predict(testSet))
+    testData['GaussianNB'] = gnbPredictedRow
+    print(testData[['Max PPG', 'PredictionVariable_Linear', 'Polynomial Prediction(Quad)', 'Polynomial Prediction(cubic)', 'GaussianNB', 'Max_PPG_RANK']])
+
     groupedTestData = None
     try:
-        groupedTestData = trainData.groupby('Player').get_group('Carlos Boozer')
+        groupedTestData = trainData.groupby('Player').get_group('Kyle Korver')
     except:
-        groupedTestData = testData.groupby('Player').get_group('Carlos Boozer')
-    print(groupedTestData[['Points Per Game', 'Max PPG', 'PredictionVariable_Linear', 'Polynomial Prediction(Quad)', 'Polynomial Prediction(cubic)']])
+        groupedTestData = testData.groupby('Player').get_group('Kyle Korver')
+    print(groupedTestData[['Max PPG', 'PredictionVariable_Linear', 'Polynomial Prediction(Quad)', 'Polynomial Prediction(cubic)']])
 
 if __name__ == '__main__':
     main()
