@@ -30,7 +30,7 @@ def main():
     pd.options.mode.chained_assignment = None
     # For Loop Gathers all season data from 1990-2020
     season_index = []
-    for i in range(30):
+    for i in range(31):
         year = 1990 + i
         true_year = str(year)
         season = BasketballReferencePull('https://www.basketball-reference.com/leagues/NBA_' + true_year + '_per_game.html', true_year)
@@ -92,38 +92,67 @@ def main():
 
     # Actual Model generations
     
-    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game']))]
+    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Total Rebounds Per Game', 'Assists Per Game', 'Random Number']))]
     dependentVariable = trainData['Max PPG']
     
     # Linear Model Generation
     linearRegr = LinearRegression()
-    linearRegr.fit(independentVariable, dependentVariable)
-    testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game', 'Random Number']))]
-    trainSet = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game', 'Random Number']))]
+    linearRegr.fit(independentVariable, dependentVariable)     # Fits x and y variable to linear model
+    # Excludes unnesescary numbers
+    testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Total Rebounds Per Game', 'Assists Per Game', 'Random Number']))]
+    trainSet = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Total Rebounds Per Game', 'Assists Per Game', 'Random Number']))]
+
+    # Uses linear model to predict
     testPrediction = linearRegr.predict(testSet)
     trainPrediction = linearRegr.predict(trainSet)
     
+    # Adds columns to dataframes
     testData['PredictionVariable_Linear'] = testPrediction
-    trainData['PredictionVariabl_Linear'] = trainPrediction
+    trainData['PredictionVariable_Linear'] = trainPrediction
 
+    # Finds the r^2 value of the model on the test data
     print('Linear Regression r^2 value(test data) is: ')
     print(linearRegr.score(testSet, testData['Max PPG']))
 
+    # Finds the r^2 value of the model on the train data
     print('\nLinear Regression r^2 values(train data) is: ')
     print(linearRegr.score(trainSet, trainData['Max PPG']))
+
+    # Output data for Joel Embiid
     wantedValues = testData[['PredictionVariable_Linear', 'Max PPG', 'Player', 'Points Per Game']].copy().groupby('Player')
     print(wantedValues.get_group('Joel Embiid'))
 
     # Polynomial Regression
+    # Fits a second degree polynomial to the data
     degree = 2
     polyreg = make_pipeline(PolynomialFeatures(degree), LinearRegression())
+    polycube = make_pipeline(PolynomialFeatures(3), LinearRegression())
     polyreg.fit(independentVariable, dependentVariable)
-    print('\nPolynomial Regression r^2 value(test data) is: \n')
-    polynomialPrediction = list(polyreg.predict(testSet))
-    testData['Polynomial Prediction'] = polynomialPrediction
+    polycube.fit(independentVariable, dependentVariable)
+
+    # Scoring of the data
+    print('\nPolynomial Regression r^2 value(test data, quadratic) is:')
     print(polyreg.score(testSet, testData['Max PPG']))
-    print(testData[['Max PPG', 'Polynomial Prediction', 'PredictionVariable_Linear']])
-    print(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Rebounds Per Game', 'Assists Per Game']))
-    lameloBall = [8.1, 3.9, 5.1, 1.8, 0.4, 4.7, 13.2, 5.7, 3.2, 2.5, 51, 31, 28.8, 1.2, ]
+
+    print('\nPolynomial Regression r^2 value(test data, cubic) is:')
+    print(polycube.score(testSet, testData['Max PPG']))
+    
+    # Predicts the test data
+    polynomialPredictionQuad = list(polyreg.predict(testSet))
+    polynomialImputationQuad = list(polyreg.predict(trainSet))
+    polynomialPredictionCubic = list(polycube.predict(testSet))
+    polynomialImputationCubic = list(polycube.predict(trainSet))
+    testData['Polynomial Prediction(Quad)'] = polynomialPredictionQuad
+    trainData['Polynomial Prediction(Quad)'] = polynomialImputationQuad
+    testData['Polynomial Prediction(cubic)'] = polynomialPredictionCubic
+    trainData['Polynomial Prediction(cubic)'] = polynomialImputationCubic
+
+    groupedTestData = None
+    try:
+        groupedTestData = trainData.groupby('Player').get_group('Carlos Boozer')
+    except:
+        groupedTestData = testData.groupby('Player').get_group('Carlos Boozer')
+    print(groupedTestData[['Points Per Game', 'Max PPG', 'PredictionVariable_Linear', 'Polynomial Prediction(Quad)', 'Polynomial Prediction(cubic)']])
+
 if __name__ == '__main__':
     main()
