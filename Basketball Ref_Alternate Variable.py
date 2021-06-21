@@ -47,6 +47,8 @@ def main():
     seasonsFloatable = seasons[seasons.columns.difference(['Player','Position','Team'])].apply(pd.to_numeric, errors='coerce', downcast='float', )   # Casts dataframe from str --> float
     
     seasons[seasonsFloatable.columns] = seasonsFloatable
+
+    seasons.to_csv('/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Basketball Info Dump.csv')
     
     # Gets a Unique set of player names
     playerNames = set(seasons['Player'].copy())
