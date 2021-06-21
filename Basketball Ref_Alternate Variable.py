@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.naive_bayes import GaussianNB
+from joblib import dump
 
 def PosToNumeric(position):
     if position == 'PG':
@@ -156,6 +157,12 @@ def main():
     gnbPredictedRow = list(gnbClassifier.predict(testSet))
     testData['GaussianNB'] = gnbPredictedRow
     print(testData[['Max PPG', 'PredictionVariable_Linear', 'Polynomial Prediction(Quad)', 'Polynomial Prediction(cubic)', 'GaussianNB', 'Max_PPG_RANK']])
+
+    # Creating Pickle Dump Files
+    dump(linearRegr, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Linear Regression Model.joblib')
+    dump(polyreg, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Quadratic Model.joblib')
+    dump(polycube, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Cubic Model.joblib')
+    dump(gnbClassifier, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Gaussian Naive Bayes Model.joblib')
 
     groupedTestData = None
     try:
