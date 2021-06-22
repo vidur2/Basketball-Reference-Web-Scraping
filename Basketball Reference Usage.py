@@ -10,10 +10,11 @@ import pandas as pd
 import numpy as np
 import random
 from sklearn.linear_model import LinearRegression
-from sklearn import metrics
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 from sklearn.naive_bayes import GaussianNB
+from joblib import dump
 
 def PosToNumeric(position):
     if position == 'PG':
@@ -31,7 +32,7 @@ def main():
     pd.options.mode.chained_assignment = None
     # For Loop Gathers all season data from 1990-2020
     season_index = []
-    for i in range(30):
+    for i in range(31):
         year = 1990 + i
         true_year = str(year)
         season = BasketballReferencePull('https://www.basketball-reference.com/leagues/NBA_' + true_year + '_per_game.html', true_year)
@@ -46,6 +47,8 @@ def main():
     seasonsFloatable = seasons[seasons.columns.difference(['Player','Position','Team'])].apply(pd.to_numeric, errors='coerce', downcast='float', )   # Casts dataframe from str --> float
     
     seasons[seasonsFloatable.columns] = seasonsFloatable
+
+    seasons.to_csv('/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Basketball Info Dump.csv')
     
     # Gets a Unique set of player names
     playerNames = set(seasons['Player'].copy())
@@ -56,9 +59,6 @@ def main():
     normalizedPPG = []
     normalizedRPG = []
     normalizedAPG = []
-    normalizedBPG = []
-    normalizedSPG = []
-    averagedPotential = []
 
     # Groups player names together
     groupedSeasons = seasons.groupby('Player')
@@ -66,98 +66,38 @@ def main():
     # Iterates through each player group to generate stats
     for player in playerNames:
         sortedDf = groupedSeasons.get_group(player)     # Generates unique player data frame
-        
-        # Lists which are reset each iteration
-        averagingPPG = []
-        averagingRPG = []
-        averagingAPG = []
-        averagingBPG = []
-        averagingSPG = []
 
         # Gets the stats from the data frame
         pointsPerGame = list(sortedDf['Points Per Game'].copy())
         reboundsPerGame = list(sortedDf['Total Rebounds Per Game'].copy())
         assistsPerGame = list(sortedDf['Assists Per Game'].copy())
-        blocksPerGame = list(sortedDf['Blocks Per Game'].copy())
-        stealsPerGame = list(sortedDf['Steals Per Game'].copy())
 
-        # Finds the maximum of each stat and computes the new stats using that
         maxPpg = max(pointsPerGame)
         maxRpg = max(reboundsPerGame)
         maxApg = max(assistsPerGame)
-        maxBpg = max(blocksPerGame)
-        maxSpg = max(stealsPerGame)
 
-        if maxPpg == 0:
-            for _ in pointsPerGame:
-                normalizedPPG.append(0)
-                averagingPPG.append(0)
-        else:
-            for year in pointsPerGame:
-                normalizedPPG.append((year/maxPpg) * 100)
-                averagingPPG.append((year/maxPpg) * 100)
-        
-        if maxRpg == 0:
-            for _ in reboundsPerGame:
-                normalizedRPG.append(0)
-                averagingRPG.append(0)
-        else:
-            for year in reboundsPerGame:
-                normalizedRPG.append((year/maxRpg) * 100)
-                averagingRPG.append((year/maxRpg) * 100)
-        
-        if maxApg == 0:
-            for _ in assistsPerGame:
-                normalizedAPG.append(0)
-                averagingAPG.append(0)
-        else:
-            for year in assistsPerGame:
-                normalizedAPG.append((year/maxApg) * 100)
-                averagingAPG.append((year/maxApg) * 100)
-        
-        if maxBpg == 0:
-            for _ in blocksPerGame:
-                normalizedBPG.append(0)
-                averagingBPG.append(0)
-        else:
-            for year in blocksPerGame:
-                normalizedBPG.append((year/maxBpg) * 100)
-                averagingBPG.append((year/maxBpg) * 100)
 
-        if maxSpg == 0:
-            for _ in stealsPerGame:
-                normalizedSPG.append(0)
-                averagingSPG.append(0)
-        else:
-            for year in stealsPerGame:
-                normalizedSPG.append((year/maxSpg) * 100)
-                averagingSPG.append((year/maxSpg) * 100)
-        
-        for i in range(len(averagingPPG)):
-            average = (averagingPPG[i - 1] + averagingRPG[i - 1] + averagingAPG[i - 1] + averagingBPG[i - 1] + averagingSPG[i - 1]) / 5
-            averagedPotential.append(average)
+        for _ in pointsPerGame:
+            normalizedPPG.append(maxPpg)
+            normalizedRPG.append(maxRpg)
+            normalizedAPG.append(maxApg)
             
     
-    # Appends to data frame
-    # seasons['Potential_PPG_PCT'] = normalizedPPG
-    # seasons['Potential_RPG_PCT'] = normalizedRPG
-    # seasons['Potential_APG_PCT'] = normalizedAPG
-    # seasons['Potential_BPG_PCT'] = normalizedBPG
-    # seasons['Potential_SPG_PCT'] = normalizedSPG
-    seasons['Tot_Potential_PCT'] = averagedPotential
+    seasons['Max PPG'] = normalizedPPG
+    seasons['Max RPG'] = normalizedRPG
+    seasons['Max APG'] = normalizedAPG
 
     # Binning the Data
-    seasons['Tot_Potential_PCT_RANK'] = pd.qcut(seasons['Tot_Potential_PCT'], labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], q=10, precision=0)
-    
-    # Prints out data frame for specific player to check
-    groupedSeasons = seasons.groupby('Player')
-    testDF = print(groupedSeasons.get_group('Paul George'))
+    categories = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    seasons['Max_PPG_RANK'] = pd.qcut(seasons['Max PPG'], labels=categories, q=10, precision=0)
+    seasons['Max_RPG_RANK'] = pd.qcut(seasons['Max RPG'], labels=categories, q=10, precision=0)
+    seasons['Max_APG_RANK'] = pd.qcut(seasons['Max APG'], labels=categories, q=10, precision=0)
 
     # Changes str Categorical variables to numeric
     seasons['Position'] = seasons['Position'].apply(PosToNumeric)
 
     # Split Data into test data frames and model generation
-    random.seed(42069)
+    random.seed(123456)
     randomRowLabel = []
     for _ in range(len(pointsPerGame) - 1):
         randomNumber = random.random()
@@ -167,39 +107,140 @@ def main():
     trainData = seasons[0:10_000].copy()
     testData = pd.DataFrame(seasons[10_001:].copy())
 
-    # Actual Model generations
+    # Actual Model generation
     
-    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Tot_Potential_PCT_RANK']))]
-    dependentVariable = trainData['Tot_Potential_PCT']
+    independentVariable = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Total Rebounds Per Game', 'Assists Per Game', 'Random Number', 'Offensive Rebounds Per Game', 'Defensive Rebounds Per Game', 'Assists Per Game', 'Max RPG', 'Max APG']))]
+    dependentVariablePoints = trainData['Max PPG']
+    dependentVariableRebounds = trainData['Max RPG']
+    dependentVariableAssists = trainData['Max APG']
     
     # Linear Model Generation
-    linearRegr = LinearRegression()
-    linearRegr.fit(independentVariable, dependentVariable)
-    testSet = testData[list(testData.columns.difference(['Player', 'Tot_Potential_PCT', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Tot_Potential_PCT_RANK']))]
-    testPrediction = linearRegr.predict(testSet)
-    testData['PredictionVariable_Linear'] = testPrediction
-    print(linearRegr.score(testSet, testData['Tot_Potential_PCT']))
+    linearRegrPoints = LinearRegression()
+    linearRegrRebounds = LinearRegression()
+    linearRegrAssists = LinearRegression()
+    # Fits x and y variable to linear model
+    linearRegrPoints.fit(independentVariable, dependentVariablePoints)
+    linearRegrRebounds.fit(independentVariable, dependentVariableRebounds)
+    linearRegrAssists.fit(independentVariable, dependentVariableAssists)
+    
+    # Excludes unnesescary numbers
+    testSet = testData[list(testData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Total Rebounds Per Game', 'Assists Per Game', 'Random Number', 'Offensive Rebounds Per Game', 'Defensive Rebounds Per Game', 'Assists Per Game', 'Max RPG', 'Max APG']))]
+    trainSet = trainData[list(trainData.columns.difference(['Player', 'Max PPG', 'Team', 'Field Goal Percentage', '3-Point Field Goal Percentage', '2-Point Field Goal Percentage', 'Effective Field Goal Percentage', 'Free Throw Percentage', 'Max_PPG_RANK', 'Points Per Game', 'Total Rebounds Per Game', 'Assists Per Game', 'Random Number', 'Offensive Rebounds Per Game', 'Defensive Rebounds Per Game', 'Assists Per Game', 'Max RPG', 'Max APG']))]
+
+    # Uses linear model to predict
+    testPredictionPoints = linearRegrPoints.predict(testSet)
+    trainPredictionPoints = linearRegrPoints.predict(trainSet)
+    testPredictionRebounds = linearRegrRebounds.predict(testSet)
+    trainPredictionRebounds = linearRegrRebounds.predict(trainSet)
+    testPredictionAssists = linearRegrAssists.predict(testSet)
+    trainPredictionAssists = linearRegrAssists.predict(trainSet)
+    
+    # Adds columns to dataframes
+    testData['PredictionVariable_Linear_Points'] = testPredictionPoints
+    trainData['PredictionVariable_Linear_Points'] = trainPredictionPoints
+    testData['PredictionVariable_Linear_Rebounds'] = testPredictionRebounds
+    trainData['PredictionVariable_Linear_Rebounds'] = trainPredictionRebounds
+    testData['PredictionVariable_Linear_Assists'] = testPredictionAssists
+    trainData['PredictionVariable_Linear_Assits'] = trainPredictionAssists
+
+
+    # Finds the r^2 value of the model on the test data
+    print('Linear Regression r^2 value(test data) is: ')
+    print(linearRegrPoints.score(testSet, testData['Max PPG']))
+    print(linearRegrRebounds.score(testSet, testData['Max RPG']))
+    print(linearRegrAssists.score(testSet, testData['Max APG']))
+
+    # Finds the r^2 value of the model on the train data
+    print('\nLinear Regression r^2 values(train data) is: ')
+    print(linearRegrPoints.score(trainSet, trainData['Max PPG']))
+    print(linearRegrRebounds.score(trainSet, trainData['Max RPG']))
+    print(linearRegrAssists.score(trainSet, trainData['Max APG']))
+
+    # Output data for Joel Embiid
+    wantedValues = testData[['PredictionVariable_Linear_Points', 'Max PPG', 'Player', 'Points Per Game']].copy().groupby('Player')
+    print(wantedValues.get_group('Joel Embiid'))
 
     # Polynomial Regression
-    #Generating Polynomial Matrix
-    dependentVariable = trainData['Tot_Potential_PCT']
-    polynomialRegr = PolynomialFeatures()
-    polynomialModels = polynomialRegr.fit_transform(independentVariable)
-    predict = polynomialRegr.fit_transform(testSet)
-    linearRegr = LinearRegression()
-    linearRegr.fit(polynomialModels, dependentVariable)
-    testData['PredictionVariable_Polynomial'] = linearRegr.predict(predict)
+    # Fits a second degree polynomial to the data
+    degree = 2
+    polyregPoints = make_pipeline(PolynomialFeatures(degree), LinearRegression())
+    polyregRebounds = make_pipeline(PolynomialFeatures(degree), LinearRegression())
+    polyregAssists = make_pipeline(PolynomialFeatures(degree), LinearRegression())
+    polycubePoints = make_pipeline(PolynomialFeatures(3), LinearRegression())
+    polycubeRebounds = make_pipeline(PolynomialFeatures(3), LinearRegression())
+    polycubeAssists = make_pipeline(PolynomialFeatures(3), LinearRegression())
     
-    # Naive Bayes Algorithm
-    gnb = GaussianNB()
-    dependentVariable = trainData['Tot_Potential_PCT_RANK']
-    gnbModel = gnb.fit(independentVariable, dependentVariable)
-    gnbOutput = gnb.predict(testSet)
-    testData['PredictionVariable_Naive Bayes'] = gnbOutput
-    groupedTest = testData.groupby("Player's age on February 1 of the season")
-    result = groupedTest.get_group(19.0)
-    print(result[['PredictionVariable_Linear', 'PredictionVariable_Polynomial', 'Tot_Potential_PCT']])
+    polyregPoints.fit(independentVariable, dependentVariablePoints)
+    polyregRebounds.fit(independentVariable, dependentVariableRebounds)
+    polyregAssists.fit(independentVariable, dependentVariableAssists)
+    polycubePoints.fit(independentVariable, dependentVariablePoints)
+    polycubeRebounds.fit(independentVariable, dependentVariableRebounds)
+    polycubeAssists.fit(independentVariable, dependentVariableAssists)
 
+
+    # Scoring of the data
+    print('\nPolynomial Regression r^2 value(test data, quadratic) is:')
+    print(polyregPoints.score(testSet, testData['Max PPG']))
+    print(polyregRebounds.score(testSet, testData['Max RPG']))
+    print(polyregAssists.score(testSet, testData['Max APG']))
+
+    print('\nPolynomial Regression r^2 value(test data, cubic) is:')
+    print(polycubePoints.score(testSet, testData['Max PPG']))
+    print(polycubeRebounds.score(testSet, testData['Max RPG']))
+    print(polycubeAssists.score(testSet, testData['Max APG']))
+    
+    # Predicts the test data
+    polynomialPredictionQuad = list(polyregPoints.predict(testSet))
+    polynomialPredictionQuadRebounds = list(polyregRebounds.predict(testSet))
+    polynomialPredictionQuadAssists = list(polyregAssists.predict(testSet))
+    polynomialImputationQuad = list(polyregPoints.predict(trainSet))
+    polynomialImputationQuadRebounds = list(polyregRebounds.predict(trainSet))
+    polynomialImputationQuadAssists = list(polyregAssists.predict(trainSet))
+
+    polynomialPredictionCubic = list(polycubePoints.predict(testSet))
+    polynomialPredictionCubicRebounds = list(polycubeRebounds.predict(testSet))
+    polynomialPredictionCubicAssists = list(polycubeAssists.predict(testSet))
+    polynomialImputationCubic = list(polycubePoints.predict(trainSet))
+    polynomialImputationCubicRebounds = list(polycubeRebounds.predict(trainSet))
+    polynomialImputationCubicAssists = list(polycubeAssists.predict(trainSet))
+    
+    # Put into dataframe
+    testData['Polynomial Prediction(Quad)_Points'] = polynomialPredictionQuad
+    testData['Polynomial Prediction(Quad)_Rebounds'] = polynomialPredictionQuadRebounds
+    testData['Polynomial Prediction(Quad)_Assists'] = polynomialPredictionQuadAssists
+    
+    trainData['Polynomial Prediction(Quad)_Points'] = polynomialImputationQuad
+    trainData['Polynomial Prediction(Quad)_Rebounds'] = polynomialImputationQuadRebounds
+    trainData['Polynomial Prediction(Quad)_Assists'] = polynomialImputationQuadAssists
+
+    
+    testData['Polynomial Prediction(cubic)_Points'] = polynomialPredictionCubic
+    testData['Polynomial Prediction(cubic)_Rebounds'] = polynomialPredictionCubicRebounds
+    testData['Polynomial Prediction(cubic)_Assists'] = polynomialPredictionCubicAssists
+
+    trainData['Polynomial Prediction(cubic)_Points'] = polynomialImputationCubic
+    trainData['Polynomial Prediction(cubic)_Rebounds'] = polynomialImputationCubicRebounds
+    trainData['Polynomial Prediction(cubic)_Assists'] = polynomialImputationCubicAssists
+
+    # Naive Bayes Classifier
+    gnbClassifierPoints = GaussianNB()
+    gnbClassifierPoints.fit(independentVariable, trainData['Max_PPG_RANK'])
+    gnbPredictedRow = list(gnbClassifierPoints.predict(testSet))
+    testData['GaussianNB_Points'] = gnbPredictedRow
+    print(testData[['Max PPG', 'PredictionVariable_Linear_Points', 'Polynomial Prediction(Quad)_Points', 'Polynomial Prediction(cubic)_Points', 'GaussianNB_Points', 'Max_PPG_RANK']])
+
+    # Creating Pickle Dump Files
+    dump(linearRegrPoints, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Linear Regression Model.joblib')
+    dump(polyregPoints, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Quadratic Model.joblib')
+    dump(polycubePoints, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Cubic Model.joblib')
+    dump(gnbClassifierPoints, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Gaussian Naive Bayes Model.joblib')
+
+    groupedTestData = None
+    try:
+        groupedTestData = trainData.groupby('Player').get_group('Kyle Korver')
+    except:
+        groupedTestData = testData.groupby('Player').get_group('Kyle Korver')
+    print(groupedTestData[['Max PPG', 'PredictionVariable_Linear_Points', 'Polynomial Prediction(Quad)_Points']])
 
 if __name__ == '__main__':
     main()
