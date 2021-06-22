@@ -223,6 +223,7 @@ def main():
     dump(polycubeAssists, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Assists/Cubic Model_Assists.joblib')
 
     groupedTestData = None
+    print('No')
     try:
         groupedTestData = trainData.groupby('Player').get_group('Kyle Korver')
     except:
