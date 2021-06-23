@@ -24,16 +24,3 @@ The model is then fitted using sklearn's builtin tools with 20 variables as inde
 
 #### Model Testing
 The model is tested on the remaining datapoints using [model_name].predict. The r^2 values are as follows:
-##### Points Per Game
-1. Linear Regression: ~0.805
-2. Quadratic Regression: ~0.826
-3. Cubic Regression: ~0.762
-4. Gaussian NB: No r^2 value calculated, but based on my observation, significantly worse than the above models
-##### Rebounds Per Game
-1. Linear Regression: ~0.890
-2. Quadratic Regression: ~0.933
-3. Cubic Regression: ~0.920
-##### Assists Per Game
-1. Linear Regression: ~0.854
-2. Quadratic Regression: ~0.934
-3. Cubic Regression: ~0.917
