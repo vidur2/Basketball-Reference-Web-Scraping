@@ -8,6 +8,7 @@ If you are using this code as a starter or otherwise please credit me
 The model output is in the folder called 'Model Dumps.' The generation is done using the file called 'Basketball Ref Alternate.py.' The models are stored in .joblib files. The most accurate model currently is the Quadratic Regression ouput.
 
 ## The Code
+The model is generated in 'ModelGeneration.py.'
 ### Gathering the data
 The data is gathered from https://www.basketball-reference.com/. It is webscraped using the request and bs4 libraries. You can see the code in basketballRefCommands.py and the first for loop of 'Basketball Ref Alternate.py.' The data gathered is on every basketball player's seasons since 1990-Current Day.
 ### Storing the Data and Creating the target Variable
@@ -22,5 +23,5 @@ The target variable is not *directly* in the 23 variables scraped from basketbal
 In order to train the model, the data is split 10,000/7,491(along rows) with the 10,0000 being the train data and the 7941 being the test data.
 The model is then fitted using sklearn's builtin tools with 20 variables as independent, and the Max PPG/RPG/APG as the dependent.
 
-#### Model Testing
-The model is tested on the remaining datapoints using [model_name].predict. The r^2 values are as follows:
+## Model Usage
+The current usage of the models can be seen in 'Analysis With Generated Models.py.' This uses a class inheritance structure to organize the different models and their uses. 
