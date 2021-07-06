@@ -114,6 +114,11 @@ class Rebounds(PotentialPredictions):
             for inpt in self.inputType:
                 self.reboundPredictions.append(max(list(playerStats['Prediction Variable ' + inpt + '_Rebounds'])))
             return self.reboundPredictions
+    
+class Assists(PotentialPredictions):
+    def __init__(self):
+        super().__init__()
+        
         
 
 def main():

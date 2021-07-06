@@ -12,7 +12,6 @@ from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
-from sklearn.naive_bayes import GaussianNB
 from joblib import dump
 
 def PosToNumeric(position):
@@ -56,6 +55,7 @@ def main():
     normalizedPPG = []
     normalizedRPG = []
     normalizedAPG = []
+    ageValues = []
 
     # Groups player names together
     groupedSeasons = seasons.groupby('Player')
@@ -68,26 +68,30 @@ def main():
         pointsPerGame = list(sortedDf['Points Per Game'].copy())
         reboundsPerGame = list(sortedDf['Total Rebounds Per Game'].copy())
         assistsPerGame = list(sortedDf['Assists Per Game'].copy())
+        age = list(sortedDf["Player's age on February 1 of the season"].copy())
 
         maxPpg = max(pointsPerGame)
         maxRpg = max(reboundsPerGame)
         maxApg = max(assistsPerGame)
+        maxAge = max(age)
 
 
         for _ in pointsPerGame:
             normalizedPPG.append(maxPpg)
             normalizedRPG.append(maxRpg)
             normalizedAPG.append(maxApg)
+            ageValues.append(maxAge)
             
     
     seasons['Max PPG'] = normalizedPPG
     seasons['Max RPG'] = normalizedRPG
     seasons['Max APG'] = normalizedAPG
+    seasons['Max Age'] = ageValues
 
     # Changes str Categorical variables to numeric
     seasons['Position'] = seasons['Position'].apply(PosToNumeric)
 
-    seasons.to_csv('/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Basketball Info Dump.csv')
+    seasons.to_csv('/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Basketball Info Dump.csv')
 
     # Split Data into test data frames and model generation
     random.seed(123456)
@@ -97,8 +101,8 @@ def main():
         randomRowLabel.append(randomNumber)
     seasons['Random Number'] = randomNumber
     seasons.sort_values('Random Number', ascending=True, ignore_index=True, inplace=True)
-    trainData = seasons[0:10_000].copy()
-    testData = pd.DataFrame(seasons[10_001:].copy())
+    trainData = seasons[0:8_000].copy()
+    testData = pd.DataFrame(seasons[8_001:].copy())
 
     # Actual Model generation
     
@@ -152,7 +156,6 @@ def main():
 
     # Output data for Joel Embiid
     wantedValues = testData[['PredictionVariable_Linear_Points', 'Max PPG', 'Player', 'Points Per Game']].copy().groupby('Player')
-    print(wantedValues.get_group('Joel Embiid'))
 
     # Polynomial Regression
     # Fits a second degree polynomial to the data
@@ -203,18 +206,18 @@ def main():
     # print(testData[['Max PPG', 'PredictionVariable_Linear_Points', 'Polynomial Prediction(Quad)_Points', 'Polynomial Prediction(cubic)_Points', 'GaussianNB_Points', 'Max_PPG_RANK']])
 
     # Creating Pickle Dump Files
-    dump(linearRegrPoints, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Linear Regression Model.joblib')
-    dump(polyregPoints, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Quadratic Model.joblib')
-    dump(polycubePoints, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Cubic Model.joblib')
-    # dump(gnbClassifierPoints, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Gaussian Naive Bayes Model.joblib')
+    dump(linearRegrPoints, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Linear Regression Model.joblib')
+    dump(polyregPoints, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Quadratic Model.joblib')
+    dump(polycubePoints, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Cubic Model.joblib')
+    # dump(gnbClassifierPoints, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Gaussian Naive Bayes Model.joblib')
 
-    dump(linearRegrRebounds, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Rebounds/Linear Regression Model_Rebounds.joblib')
-    dump(polyregRebounds, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Rebounds/Quadratic Model_Rebounds.joblib')
-    dump(polycubeRebounds, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Rebounds/Cubic Model_Rebounds.joblib')
+    dump(linearRegrRebounds, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Rebounds/Linear Regression Model_Rebounds.joblib')
+    dump(polyregRebounds, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Rebounds/Quadratic Model_Rebounds.joblib')
+    dump(polycubeRebounds, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Rebounds/Cubic Model_Rebounds.joblib')
     
-    dump(linearRegrAssists, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Assists/Linear Regression Model_Assists.joblib')
-    dump(polyregAssists, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Assists/Quadratic Model_Assists.joblib')
-    dump(polycubeAssists, '/Users/vidurmodgil/Desktop/Programming Projects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Assists/Cubic Model_Assists.joblib')
+    dump(linearRegrAssists, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Assists/Linear Regression Model_Assists.joblib')
+    dump(polyregAssists, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Assists/Quadratic Model_Assists.joblib')
+    dump(polycubeAssists, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Assists/Cubic Model_Assists.joblib')
 
     groupedTestData = None
 
