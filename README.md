@@ -1,8 +1,7 @@
 # Basketball-Reference-Web-Scraping
 ## Overview
 The purpose of this code is to take data from basketball reference and use it to make predictions.
-Its current use is generating predictions about player potential(Max PPG, Max RPG, Max APG)
-If you are using this code as a starter or otherwise please credit me
+Its current use is generating predictions about player potential(Max PPG, Max RPG, Max APG).
 
 ## Output
 The model output is in the folder called 'Model Dumps.' The generation is done using the file called 'Basketball Ref Alternate.py.' The models are stored in .joblib files. The most accurate model currently is the Quadratic Regression ouput.
