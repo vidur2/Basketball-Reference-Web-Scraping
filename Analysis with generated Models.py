@@ -118,18 +118,63 @@ class Rebounds(PotentialPredictions):
 class Assists(PotentialPredictions):
     def __init__(self):
         super().__init__()
+        self.assistsModelLinear = load(str(self.workingDir) + '/Model Dumps/Assists/Linear Regression Model_Assists.joblib')
+        self.assistsModelQuadratic = load(str(self.workingDir) + '/Model Dumps/Assists/Quadratic Model_Assists.joblib')
+        self.assistsModelCubic = load(str(self.workingDir) + '/Model Dumps/Assists/Cubic Model_Assists.joblib')
+    
+    def predict(self, modelType: str):
+        didPass = True
+        self.inputType.append(modelType)
+
+        if modelType == 'Linear':
+            self.prediction = self.assistsModelLinear.predict(self.independentVariable)
+        elif modelType == 'Quadratic':
+            self.prediction = self.assistsModelQuadratic.predict(self.independentVariable)
+        elif modelType == 'Cubic':
+            self.prediction = self.assistsModelCubic.predict(self.independentVariable)
+        else:
+            didPass = False
+        
+        if didPass == True:
+            self.dataSet['Prediction Variable ' + modelType + '_Assists'] = list(self.prediction)
+        
+        return didPass
+
+    def scoreModel(self, modelType: str):
+        if modelType == 'Linear':
+            return self.assitsModelLinear.score(self.independentVariable, self.dependentVariable)
+        elif modelType == 'Quadratic':
+            return self.assistsModelQuadratic.score(self.independentVariable, self.dependentVariable)
+        elif modelType == 'Cubic':
+            return self.assistsModelCubic.score(self.independentVariable, self.dependentVariable)
+        else:
+            return None
+    
+    def playerPredictionAssists(self, PlayerName: str):
+        self.assistPredictions = []
+        if(len(self.inputType) == 0):
+            return None
+        else:
+            playerStats = self.getPlayer(PlayerName)
+            for inpt in self.inputType:
+                self.assistPredictions.append(max(list(playerStats['Prediction Variable ' + inpt + '_Assists'])))
+            return self.assistPredictions
         
         
 
 def main():
     points = Points()
     rebounds = Rebounds()
+    assists = Assists()
+    assists.predict('Quadratic')
     points.predict('Quadratic')
     rebounds.predict('Quadratic')
     print(points.getPlayer('Joel Embiid'))
     print(points.playerPredictionPoints('Joel Embiid'))
     print(rebounds.getPlayer('Joel Embiid'))
     print(rebounds.playerPredictionRebounds('Joel Embiid'))
+    print(assists.getPlayer('Joel Embiid'))
+    print(assists.playerPredictionAssists('Joel Embiid'))
 
 if __name__ == '__main__':
     main()

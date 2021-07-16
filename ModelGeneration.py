@@ -12,6 +12,7 @@ from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import BayesianRidge
 from joblib import dump
 
 def PosToNumeric(position):
@@ -101,8 +102,8 @@ def main():
         randomRowLabel.append(randomNumber)
     seasons['Random Number'] = randomNumber
     seasons.sort_values('Random Number', ascending=True, ignore_index=True, inplace=True)
-    trainData = seasons[0:8_000].copy()
-    testData = pd.DataFrame(seasons[8_001:].copy())
+    trainData = seasons[0:10_000].copy()
+    testData = pd.DataFrame(seasons[10_001:].copy())
 
     # Actual Model generation
     
@@ -198,12 +199,22 @@ def main():
     testData['Polynomial Prediction(cubic)_Points'] = polynomialPredictionCubic
     trainData['Polynomial Prediction(cubic)_Points'] = polynomialImputationCubic
 
-    # Naive Bayes Classifier
-    # gnbClassifierPoints = GaussianNB()
-    # gnbClassifierPoints.fit(independentVariable, trainData['Max_PPG_RANK'])
-    # gnbPredictedRow = list(gnbClassifierPoints.predict(testSet))
-    # testData['GaussianNB_Points'] = gnbPredictedRow
-    # print(testData[['Max PPG', 'PredictionVariable_Linear_Points', 'Polynomial Prediction(Quad)_Points', 'Polynomial Prediction(cubic)_Points', 'GaussianNB_Points', 'Max_PPG_RANK']])
+    
+    # Bayesian Regression Model class instantiation
+    bayesModelPoints = BayesianRidge()
+    bayesModelAssists = BayesianRidge()
+    bayesModelRebounds = BayesianRidge()
+
+    # Fits model using Bayesian Regression
+    bayesModelPoints.fit(independentVariable, dependentVariablePoints)
+    bayesModelAssists.fit(independentVariable, dependentVariableAssists)
+    bayesModelRebounds.fit(independentVariable, dependentVariableRebounds)
+
+    # Scores Bayesian Regression Model
+    print('\nBayesian Model Scoring:')
+    print(bayesModelPoints.score(testSet, testData['Max PPG']))
+    print(bayesModelRebounds.score(testSet, testData['Max RPG']))
+    print(bayesModelAssists.score(testSet, testData['Max APG']))
 
     # Creating Pickle Dump Files
     dump(linearRegrPoints, '/Users/vidurmodgil/Desktop/ProgrammingProjects/BasketBall Reference Analysis/Basketball-Reference-Web-Scraping/Model Dumps/Points/Linear Regression Model.joblib')
