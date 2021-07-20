@@ -34,8 +34,8 @@ def storePlayerInfo(playerContent: tuple):
         if playerContent != None:
             htmlContent, playerName = playerContent
             soup = BeautifulSoup(htmlContent, 'html.parser')
-            dataStorage = []
-            headers = []
+            dataStorage = [playerName]
+            headers = ['Player']
             #print(soup.prettify())
             for data in soup.find_all('td'):
                 dataStorage.append(data.get_text())
