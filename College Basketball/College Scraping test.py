@@ -16,8 +16,8 @@ from concurrent.futures.process import ProcessPoolExecutor
 
 def getPlayerInfo(playerName: str):
     try:
-        playerName.replace('*', '')
         playerNameUnsplit = playerName
+        playerName = playerName.replace('*', '')
         playerName = playerName.split(' ')
         firstName = playerName[0].lower()
         lastName = playerName[1].lower()
@@ -26,6 +26,8 @@ def getPlayerInfo(playerName: str):
         #print(resp.status_code)
         if resp.status_code == 200:
             return resp.content, playerNameUnsplit
+        else:
+            print('404')
     except Exception as e:
         print(str(e))
 
@@ -72,6 +74,7 @@ def main():
     csvData = pd.read_csv(workingDir + "/Basketball Info Dump.csv")
     nbaPlayers = set(csvData['Player'])
     myList = list()
+    asterisks = []
     print(len(nbaPlayers))
 
     with ThreadPoolExecutor() as executor:
