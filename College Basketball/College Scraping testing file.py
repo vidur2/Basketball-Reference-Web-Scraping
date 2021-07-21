@@ -26,6 +26,8 @@ def main():
         iterator = iterator + 1
     finalIndex = indexStore[len(indexStore) - 1]
     collegeCareerStats = dataStorage[finalIndex:]
+    collegeCareerStats.insert(0, 'Vince Carter')
+    headers.insert(0,'Player' )
     print(len(collegeCareerStats))
     df = pd.DataFrame(data=collegeCareerStats)
     df = df.transpose()

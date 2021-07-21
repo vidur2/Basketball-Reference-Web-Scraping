@@ -54,6 +54,8 @@ def storePlayerInfo(playerContent: tuple):
                 iterator = iterator + 1
             finalIndex = indexStore[len(indexStore) - 1]
             collegeCareerStats = dataStorage[finalIndex:]
+            collegeCareerStats.insert(0, playerName)
+            headers.insert(0,'Player' )
             df = pd.DataFrame(data=collegeCareerStats)
             df = df.transpose()
             df.columns = headers
