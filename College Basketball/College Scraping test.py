@@ -89,7 +89,7 @@ def main():
             dfList.append(page.result())
     
     completedDf = pd.concat(dfList)
-    #completedDf.to_csv(workingDir + '/College Stats.csv')
+    completedDf.to_csv(workingDir + '/College Basketball/College Stats.csv')
     print(completedDf)
 
 
