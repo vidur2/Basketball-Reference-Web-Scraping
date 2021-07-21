@@ -21,7 +21,7 @@ def getPlayerInfo(playerName: str):
         playerName = playerName.split(' ')
         firstName = playerName[0].lower()
         lastName = playerName[1].lower()
-        #print('http://www.sports-reference.com/cbb/players/' + firstName + '-' + lastName + '-1.html')
+        print('http://www.sports-reference.com/cbb/players/' + firstName + '-' + lastName + '-1.html')
         resp = requests.get('https://www.sports-reference.com/cbb/players/' + firstName + '-' + lastName + '-1.html')
         #print(resp.status_code)
         if resp.status_code == 200:
@@ -34,8 +34,8 @@ def storePlayerInfo(playerContent: tuple):
         if playerContent != None:
             htmlContent, playerName = playerContent
             soup = BeautifulSoup(htmlContent, 'html.parser')
-            dataStorage = [playerName]
-            headers = ['Player']
+            dataStorage = []
+            headers = []
             #print(soup.prettify())
             for data in soup.find_all('td'):
                 dataStorage.append(data.get_text())
@@ -66,6 +66,7 @@ def storePlayerInfo(playerContent: tuple):
 
 def main():
     workingDir = os.getcwd()
+    workingDir.replace('/College Basketball', '')
     csvData = pd.read_csv(workingDir + "/Basketball Info Dump.csv")
     nbaPlayers = set(csvData['Player'])
     myList = list()
@@ -86,6 +87,7 @@ def main():
             dfList.append(page.result())
     
     completedDf = pd.concat(dfList)
+    #completedDf.to_csv(workingDir + '/College Stats.csv')
     print(completedDf)
 
 

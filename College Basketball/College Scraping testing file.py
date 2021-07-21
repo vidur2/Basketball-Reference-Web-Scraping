@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 
 def main():
-    page = requests.get('https://www.sports-reference.com/cbb/players/vince-carter-1.html')
+    page = requests.get('http://www.sports-reference.com/cbb/players/alex-caruso-1.html')
     soup = BeautifulSoup(page.content, 'html.parser')
     dataStorage = []
     headers = []
