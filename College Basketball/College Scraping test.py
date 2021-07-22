@@ -18,6 +18,8 @@ def getPlayerInfo(playerName: str):
     try:
         playerNameUnsplit = playerName
         playerName = playerName.replace('*', '')
+        playerName = playerName.replace('.', '')
+        playerName = playerName.replace("'", '')
         playerName = playerName.split(' ')
         firstName = playerName[0].lower()
         lastName = playerName[1].lower()
