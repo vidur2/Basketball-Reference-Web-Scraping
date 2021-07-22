@@ -24,3 +24,6 @@ The model is then fitted using sklearn's builtin tools with 20 variables as inde
 
 ## Model Usage
 The current usage of the models can be seen in 'Analysis With Generated Models.py.' This uses a class inheritance structure to organize the different models and their uses. 
+
+## Status
+v1 of project is complete(with nba model dumps)
