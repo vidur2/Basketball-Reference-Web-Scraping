@@ -35,6 +35,14 @@ def main():
            playerIndex = nbaDf[nbaDf['Player'] == player].index
            nbaDf.drop(playerIndex, inplace=True)
     nbaDf.set_index('Player', drop=True, inplace=True)
+    nbaDf.drop_duplicates(inplace=True, ignore_index = False)
+    # for player in collegePlayersUnique:
+    #     if player not in set(nbaDf.index):
+    #         playerIndex = collegeDf[collegeDf['Player'] == player].index
+    #         collegeDf.drop(playerIndex, inplace=True)
+    collegeDf.set_index('Player', inplace=True)
+    combinedDf = pd.concat([nbaDf, collegeDf], 1, 'inner')
+    
     
 
 if __name__ == '__main__':
