@@ -6,7 +6,7 @@ Vidur Modgil
 # Imports
 from basketballRefCommands import BasketballReferencePull
 import pandas as pd
-import numpy as np
+#import numpy as np
 import random
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
