@@ -14,22 +14,17 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from concurrent.futures.process import ProcessPoolExecutor
 
 
-def getPlayerInfo(playerName: str):
+def getPlayerInfo(playerNameInfo: tuple):
     try:
-        playerNameUnsplit = playerName
-        playerName = playerName.replace('*', '')
-        playerName = playerName.replace('.', '')
-        playerName = playerName.replace("'", '')
-        playerName = playerName.split(' ')
-        firstName = playerName[0].lower()
-        lastName = playerName[1].lower()
-        print('http://www.sports-reference.com/cbb/players/' + firstName + '-' + lastName + '-1.html')
-        resp = requests.get('https://www.sports-reference.com/cbb/players/' + firstName + '-' + lastName + '-1.html')
-        #print(resp.status_code)
+        playerNameUnsplit, firstName, lastName = playerNameInfo
+        print('http://www.sports-reference.com/cbb/players/' + firstName + '-' + lastName + '1.html')
+        
+        resp = requests.get('https://www.sports-reference.com/cbb/players/' + firstName + '-' + lastName + '1.html')
+
         if resp.status_code == 200:
             return resp.content, playerNameUnsplit
         else:
-            print('404')
+            print('404' + ' ' + playerNameUnsplit)
     except Exception as e:
         print(str(e))
 
@@ -75,13 +70,23 @@ def main():
     workingDir.replace('/College Basketball', '')
     csvData = pd.read_csv(workingDir + "/Basketball Info Dump.csv")
     nbaPlayers = set(csvData['Player'])
-    myList = list()
-    asterisks = []
-    print(len(nbaPlayers))
+    nbaPlayerInfo = []
+    for player in nbaPlayers:
+        print(player)
+        playerNameUnsplit = player
+        player= player.replace('*', '')
+        player = player.replace('.', '')
+        player = player.replace("'", '')
+        player = player.split(' ')
+        firstName = player[0].lower()
+        lastName = ''
+        if len(player) == 2:
+            lastName = player[1].lower() + '-'
+        nbaPlayerInfo.append((playerNameUnsplit, firstName, lastName))
 
     with ThreadPoolExecutor() as executor:
         pages = list()
-        pageSubmission = [executor.submit(getPlayerInfo, player) for player in nbaPlayers]
+        pageSubmission = [executor.submit(getPlayerInfo, player) for player in nbaPlayerInfo]
         
         for page in concurrent.futures.as_completed(pageSubmission):
             pages.append(page.result())
