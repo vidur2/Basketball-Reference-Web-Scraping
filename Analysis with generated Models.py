@@ -1,7 +1,7 @@
 '''
 Use Generated Models
 Vidur Modgil
-Basketball Reference Project
+Basketball Reference Project- NBA Models
 
 Use the generated models to create more efficiently running code than previous Models
 '''

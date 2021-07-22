@@ -1,3 +1,12 @@
+'''
+College Scraping Test File
+Vidur Modgil
+Basketball Reference Project- College Models
+
+Seeing how to navigate the html tree of the college website html
+'''
+
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd

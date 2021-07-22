@@ -1,6 +1,9 @@
 '''
-Basketball Reference Usage 2021
+Generate Models
 Vidur Modgil
+Basketball Reference Project- NBA Models
+
+Generate the Models using sports-reference data and sklearn
 '''
 # Test
 # Imports

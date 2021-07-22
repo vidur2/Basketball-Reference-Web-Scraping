@@ -1,7 +1,9 @@
 '''
 Combining two different csvs and generating a model
-Basketball Reference Code-College Reference
-7/21/21
+Vidur Modgil
+Basketball Reference Project-College Reference
+
+Use 2 Different Scraped CSVs to generate pre-draft predicitons using college data
 '''
 
 # Imports

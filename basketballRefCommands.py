@@ -2,11 +2,16 @@
 # coding: utf-8
 
 # In[3]:
+'''
+Scrape Basketball-Reference
+Vidur Modgil
+Basketball Reference Project- NBA Models
 
+Use Requests and bs4 to scrape and organize data from basketball reference
+'''
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 def BasketballReferencePull(link, year):

@@ -1,7 +1,9 @@
 '''
-Testing the viability of scraping college websites
+Scrape NBA player college stats
+Vidur Modgil
+Basketball Reference Project- College Reference Project
 
-Takes the set() of nba players from the .csv file
+Use multithreading and .csv files in order to get all nba player data
 '''
 
 # Imported Modules
