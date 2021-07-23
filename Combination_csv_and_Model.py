@@ -9,6 +9,7 @@ Use 2 Different Scraped CSVs to generate pre-draft predicitons using college dat
 # Imports
 import os
 import pandas as pd
+from random import random as rand
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
@@ -36,12 +37,32 @@ def main():
            nbaDf.drop(playerIndex, inplace=True)
     nbaDf.set_index('Player', drop=True, inplace=True)
     nbaDf.drop_duplicates(inplace=True, ignore_index = False)
-    # for player in collegePlayersUnique:
-    #     if player not in set(nbaDf.index):
-    #         playerIndex = collegeDf[collegeDf['Player'] == player].index
-    #         collegeDf.drop(playerIndex, inplace=True)
+    
+    # Imputating the missing calues
     collegeDf.set_index('Player', inplace=True)
     combinedDf = pd.concat([nbaDf, collegeDf], 1, 'inner')
+    combinedDf.fillna(combinedDf.median(), inplace=True)
+    combinedDf.dropna(axis=1, how='all', inplace=True)
+    print(combinedDf.info())
+
+    # Splitting the data randomly
+    rows = len(combinedDf['Max PPG'])
+    randomVal = [rand() for _ in range(rows)]
+    combinedDf['Rand_Key'] = randomVal
+    combinedDf.sort_values('Rand_Key', inplace=True, ignore_index=True)
+    trainData = combinedDf[:1500]
+    testData = combinedDf[1501:]
+
+    # Model Generation
+    indVar = trainData[combinedDf.columns.difference(['Max PPG', 'Max RPG', 'Max APG', 'Unnamed: 0', '* = NCAA Tournament appearance'])]
+    depVar = trainData[['Max PPG', 'Max RPG', 'Max APG']]
+    indVarTest = testData[combinedDf.columns.difference(['Max PPG', 'Max RPG', 'Max APG', 'Unnamed: 0', '* = NCAA Tournament appearance'])]
+    depVarTest = testData[['Max PPG', 'Max RPG', 'Max APG']]
+
+    linearRegrPoints = LinearRegression()
+    linearRegrPoints.fit(indVar, depVar)
+    print(linearRegrPoints.score(indVarTest, depVarTest))
+
     
     
 
