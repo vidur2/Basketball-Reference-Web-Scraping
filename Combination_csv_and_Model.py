@@ -63,6 +63,10 @@ def main():
     linearRegrPoints.fit(indVar, depVar)
     print(linearRegrPoints.score(indVarTest, depVarTest))
 
+    quadRegrPoints = make_pipeline(PolynomialFeatures(3), LinearRegression())
+    quadRegrPoints.fit(indVar, depVar)
+    print(quadRegrPoints.score(indVarTest, depVarTest))
+
     
     
 
